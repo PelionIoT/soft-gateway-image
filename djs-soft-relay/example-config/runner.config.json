@@ -1,0 +1,249 @@
+{
+    "logger":{
+        "type":"global",
+        "sinkaddress":"/tmp/grease.socket",
+        "config":"${thisdir}/relay_logger.conf.json"
+    },
+    "container_templates":{
+        "example_container":{
+            "capabilities":{
+                "NET_BIND_SERVICE":"permitted"
+            },
+            "cgroup_limits":{
+
+            },
+            "chroot_prefix":"/tmp/devjs_container"
+        }
+    },
+    "deviceJSConfig":"{{devicejsConfFile}}",
+    "defaults":{
+        "default_user":"*",        // means whoever runs it
+        "default_group":"*"        // means whatever group runs it
+    },
+    "HOOK":{
+        "LEDController":{
+            "startWithRunner":false,
+            "config":{
+                "ledBrightness":5,
+                "ledColorProfile":"{{ledconfig}}"
+            }
+        }
+    }, 
+    "process_groups":{
+        "core":{
+            "limits":{
+                "cgroup_limits":{
+
+                },
+                "capabilties":{
+
+                }
+            },
+            "node_args":[
+                "--max-executable-size=96",
+                "--max-old-space-size=128",
+                "--max-semi-space-size=1",
+                "--nouse-idle-notification"
+            ],
+            "restart":{
+                "limit":5000,
+                "timeout":90000
+            },
+            "modules":{
+
+            },
+            "deviceJSCore":{
+                "root":"/wigwag/devicejs-ng",
+                "opts":[
+
+                ],
+                "execWaitTimeMS":5000                // I need this to wait this long for now
+            }
+        },
+        "db":{
+            "restart":{
+                "limit":5000,
+                "timeout":2000
+            },
+            "execPath":"/usr/bin/devicedb",
+            "configFile":"{{devicedbConfFile}}"
+        },
+        "all-modules":{
+            "limits":{
+                "limit_group":""                // cgroup limits here - TBD
+            },
+            "node_args":[
+                "--max-executable-size=96",
+                "--max-old-space-size=128",
+                "--max-semi-space-size=1"
+            ],
+            "restart":{ // not required,but options are:
+                "timeout":90000, // the timeout between restarts will still take affect
+                "limit":5000
+            },
+            "env":{
+                "NODE_PATH":"${NODE_PATH}:${thisdir}/../node_modules:/wigwag/devicejs-core-modules/IPStack/node_modules"
+            },
+            "modules":[
+                {
+		    "path": "/wigwag/wigwag-core-modules/VirtualDeviceDriver",
+		    "config": {
+			"deviceControllersDirectory": "templates",
+			"logLevel": 2
+		    }
+		},
+                {
+                    "path":"/wigwag/devicejs-core-modules/core-interfaces",
+                    "config":{
+
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/RelayStatsSender",
+                    "config":{
+                        "cloudAddress":"{{cloudurl}}",
+                        "relayID":"{{apikey}}",
+                        "ssl":{
+                            "key":"{{sslCertsPath}}/client.key.pem",
+                            "cert":"{{sslCertsPath}}/client.cert.pem",
+                            "ca":[
+                                "{{sslCertsPath}}/ca.cert.pem",
+                                "{{sslCertsPath}}/intermediate.cert.pem"
+                            ]
+                        },
+                        "versionsFile":"{{relayFirmwareVersionFile}}"
+                    }
+                }
+            ]
+        },
+        "user":{
+            "limits":{
+                "limit_group":""
+            },
+            "node_args":[
+                "--max-executable-size=96",
+                "--max-old-space-size=128",
+                "--max-semi-space-size=1"
+            ],
+            "restart":{
+                "limit":5000,
+                "timeout":90000
+            },
+            "env":{
+                "NODE_PATH":"${NODE_PATH}:/wigwag/devicejs-core-modules/node_modules"
+            },
+            "modules":[
+                {
+                    "path":"/wigwag/wigwag-core-modules/RuleEngine",
+                    "config":{
+                        "cloudAddress":"{{cloudurl}}",
+                        "relayID":"{{apikey}}",
+                        "ssl":{
+                            "key":"{{sslCertsPath}}/client.key.pem",
+                            "cert":"{{sslCertsPath}}/client.cert.pem",
+                            "ca":[
+                                "{{sslCertsPath}}/ca.cert.pem",
+                                "{{sslCertsPath}}/intermediate.cert.pem"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "path":"/wigwag/devicejs-core-modules/AppServer",
+                    "config":{
+                        "authentication":{
+                            "enabled":true,
+                            "cloudAPISecret":"{{apisecret}}",
+                            "redirectURL":"/wigwag-ui/s/login/",
+                            "cloudRedirectURL":"{{cloudurl}}/s/login"
+                        },
+                        "port":443,
+                        "ssl":{
+                            "key":"{{sslCertsPath}}/client.key.pem",
+                            "cert":"{{sslCertsPath}}/client.cert.pem",
+                            "ca":[
+                                "{{sslCertsPath}}/ca.cert.pem",
+                                "{{sslCertsPath}}/intermediate.cert.pem"
+                            ]
+                        },
+                        "relayID":"{{apikey}}"
+                    }
+                },
+                {
+                    "path":"/wigwag/devicejs-core-modules/APIProxy",
+                    "config":{
+                        "cloudAPISecret":"{{apisecret}}",
+                        "apiKey":"hello",
+                        "apiSecret":"asdfdsfa"
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/WigWagMobileUI",
+                    "config":{
+
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/wigwag-ui",
+                    "config":{
+                        "cloudAPISecret":"{{apisecret}}"
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/WWRelayWebUI",
+                    "config":{
+
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/RuleUI",
+                    "config":{
+                        "debug_mode":true,
+                        "debug_level":3,    // goes up to 3, default 1
+                        "RULE_NODE_TYPES_DIRECTORY":[
+                            "/wigwag/wigwag-core-modules/RuleEngine/src/nodes"
+                        ],
+                        "FORMS_DIR":[
+                            {
+                                "path":"/wigwag/wigwag-core-modules/RuleUI/schemaFormDialogs",
+                                "ignores":[
+                                    "_public"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "path":"/wigwag/wigwag-core-modules/moods",
+                    "config":{
+                        "jwtSecret":"IXPySxxr0f5X2CIqdB45eK",
+                        "apiKey":"{{apikey}}",
+                        "apiSecret":"{{apisecret}}"
+                    }
+                }
+            ]
+        },
+	"virtual_device_setup": {
+	    "limits": {
+		"limit_group": ""
+	    },
+	    "node_args": [
+		"--max-executable-size=96",
+		"--max-old-space-size=128",
+		"--max-semi-space-size=1"
+	    ],
+	    "restart": {
+		"limit": 5000,
+		"timeout": 90000
+	    },
+	    "env": {
+		"NODE_PATH": "${NODE_PATH}:/wigwag/devicejs-core-modules/node_modules"
+	    },
+	    "modules": [
+		{
+		    "path": "/apps/interact_with_soft_relay"
+		}
+	    ]
+	}
+    }
+}

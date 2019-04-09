@@ -1,0 +1,14 @@
+// example config file mbed-devicejs-bridge
+{
+    "debug": true,
+//    "useDefaults": true,         // default is true
+    "mapUnplacedDevices": true,  // default is true
+    "ignoreDevicesById" : [],    // list of any deviceIDs not to map
+    "relayID": "WWSR000012",     // This is the Relay ID. This should be populated by 
+                                 // maestro using the meta variable: {{ARCH_relayID}}
+    "mbedAPIKey": "ak_1MDE1ZDUwYTFmYmM2MDI0MjBhMDExMTA5MDAwMDAwMDA015e967fe74802420a01390300000000aJOhYRqzTXINzN9Aw2OkV5WrG0YwgmKS",
+    "spawnEdgeCore": true,
+    // If true, then we must provide a path to edge-core, with needed options
+    // Note: this is not a final production method. In production, edge-core will be started by Maestro
+    "edgeExecCmd": ["/wigwag/mbed-cloud-edge-confidential-w/build/mcc-linux-x86/existing/bin/edge-core","9100","9101"]
+}

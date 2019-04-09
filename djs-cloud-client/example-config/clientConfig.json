@@ -1,0 +1,13 @@
+{
+    "https": {
+	"client": {
+	    "ca": [
+		"./ca.cert.pem",
+		"./intermediate.cert.pem"
+	    ]
+	}
+    },
+    "cloudAddress": "http://localhost:8585",
+    "devicejsAddress": "https://localhost:8443",
+    "devicedbAddress": "https://localhost:8443"
+}

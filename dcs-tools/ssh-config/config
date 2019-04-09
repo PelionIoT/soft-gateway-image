@@ -1,0 +1,10 @@
+host wigwagcloud_github.com
+     HostName github.com
+     IdentityFile /wigwag/wigwag_devops_cloud_github_latest
+     User git
+
+host github.com
+     HostName github.com
+     IdentityFile /wigwag/wigwag_devops_cloud_github_latest
+     User git
+
